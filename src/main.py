@@ -1,7 +1,11 @@
 import pandas as pd
 import numpy as np
+import matplotlib as mpl
 import matplotlib.pyplot as plt
+from matplotlib import style        # print(plt.style.available)
 import seaborn as sb
+
+
 '''
 # Attributes for both student-mat.csv (Math course) and student-por.csv (Portuguese language course) datasets:
 1 school - student's school (binary: "GP" - Gabriel Pereira or "MS" - Mousinho da Silveira)
@@ -40,9 +44,18 @@ import seaborn as sb
 31 G2 - second period grade (numeric: from 0 to 20)
 32 G3 - final grade (numeric: from 0 to 20, output target)
 '''
+
+mpl.rcParams['axes.grid'] = True            # To turn on the grid
+plt.style.use('tableau-colorblind10')       # To change the style of plots
+pd.set_option('display.max_columns', None)  # To display all the columns in the dataframe
+
 student_data_por = pd.read_csv('../data/student-por.csv', sep=';')
 student_data_mat = pd.read_csv('../data/student-mat.csv', sep=';')
 
+
+#########################################################################################
+### Data Processing
+#########################################################################################
 def df_map(target):
     '''
     Turns any string values in the students dataset into booleans and integers
@@ -102,12 +115,58 @@ def df_map(target):
 df_map(student_data_por)
 df_map(student_data_mat)
 
-mask = student_data_por['school'].values == False
-pos = np.flatnonzero(mask)
-print(pos.size)
-plt.hist(student_data_por['G3'][mask],bins=20, rwidth=0.9)
-mask = student_data_por['school'].values == True
-pos = np.flatnonzero(mask)
-print(pos.size)
-plt.hist(student_data_por['G3'][mask],bins=20, rwidth=0.6)
+
+#########################################################################################
+### Data exploration
+#########################################################################################
+# General
+student_data_por.hist(figsize=(10,10))
 plt.show()
+fig, ax1 = plt.subplots()
+ax2 = ax1.twinx()
+ax1.scatter(student_data_por['age'],student_data_por['G3'])
+ax2.scatter(student_data_por['Medu'],student_data_por['G3'], color="r")
+plt.show()
+
+# 1- School
+mask = student_data_por['school'].values == False   # Mark wanted values as True & unwanted values as False in an array
+pos1 = np.flatnonzero(mask)                         # Pick the indices of the Trues from the mask into an array
+mask = student_data_por['school'].values == True
+pos2 = np.flatnonzero(mask)
+plt.hist(student_data_por['G3'][pos1], bins=20, rwidth=0.9)
+plt.hist(student_data_por['G3'][pos2], bins=20, rwidth=0.6)
+plt.show()
+print('Count of position 1: ',pos1.size, 
+      '\nCount of position 2: ',pos2.size , 
+      '\nMarks of school 1 vs school 2')
+
+# 2- Sex
+mask = student_data_por['sex'].values == False
+pos1 = np.flatnonzero(mask)
+mask = student_data_por['sex'].values == True
+pos2 = np.flatnonzero(mask)
+plt.hist(student_data_por['G3'][pos1],bins=20, rwidth=0.9)
+plt.hist(student_data_por['G3'][pos2],bins=20, rwidth=0.6)
+plt.show()
+print('Count of position 1: ',pos1.size, 
+      '\nCount of position 2: ',pos2.size , 
+      '\nMarks of Females vs Males')
+
+# 2- Age
+student_data_por.plot.hexbin(x="G3", y="age", gridsize=8,cmap="viridis");
+plt.show()
+student_data_por['G3'].plot.kde()
+plt.show()
+
+
+#########################################################################################
+### Model Development
+#########################################################################################
+
+#########################################################################################
+### Model Evaluation
+#########################################################################################
+
+#########################################################################################
+### Model Deployment
+#########################################################################################
